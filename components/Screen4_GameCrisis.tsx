@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Hammer, ArrowRight, RotateCcw, SkipForward } from 'lucide-react';
+import { ArrowRight, RotateCcw } from 'lucide-react';
 import content from '@/content/landing.ru.json';
 import {
   trackGameHit,
   trackGameComplete,
   trackGameRetry,
-  trackGameSkip,
 } from '@/lib/analytics';
 
 interface Screen4_GameCrisisProps {
@@ -18,31 +17,54 @@ interface Screen4_GameCrisisProps {
 interface Letter {
   char: string;
   broken: boolean;
+  removed: boolean;
+  experienceChar: string | null; // Буква из ОПЫТ, которая появится на месте этой буквы
   index: number;
 }
 
 export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) {
   const screenContent = content.screens.s4;
   const [letters, setLetters] = useState<Letter[]>([]);
+  const [phase, setPhase] = useState<'first' | 'second'>('first');
   const [isComplete, setIsComplete] = useState(false);
   const [hammerPosition, setHammerPosition] = useState({ x: 0, y: 0 });
   const [isHitting, setIsHitting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Маппинг букв КРИЗИС к буквам ОПЫТ
+  const crisisToExperienceMap: Record<number, string> = {
+    1: 'О', // Р -> О
+    2: 'П', // И -> П
+    3: 'Ы', // З -> Ы
+    4: 'Т', // И -> Т
+  };
 
   useEffect(() => {
     setIsMounted(true);
     if (typeof window === 'undefined') return;
+    
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
+    setIsMobile(window.innerWidth < 768);
 
     const handleChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
 
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
     mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -52,6 +74,8 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
       word.split('').map((char, index) => ({
         char,
         broken: false,
+        removed: false,
+        experienceChar: crisisToExperienceMap[index] || null,
         index,
       }))
     );
@@ -89,28 +113,67 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
 
   const handleHit = (index: number) => {
     const letter = letters[index];
-    if (letter.broken || isHitting) return;
+    if (isHitting) return;
+    
+    if (phase === 'first') {
+      // Фаза 1: делаем букву серой (broken)
+      if (letter.broken) return;
+      
+      setIsHitting(true);
+      trackGameHit(letter.char, index);
 
-    setIsHitting(true);
-    trackGameHit(letter.char, index);
+      setLetters((prev) =>
+        prev.map((l, i) => (i === index ? { ...l, broken: true } : l))
+      );
 
-    setLetters((prev) =>
-      prev.map((l, i) => (i === index ? { ...l, broken: true } : l))
-    );
+      setTimeout(() => {
+        setIsHitting(false);
+        setLetters((currentLetters) => {
+          const allBroken = currentLetters.every((l) => l.broken);
+          if (allBroken) {
+            // Переходим ко второй фазе
+            setTimeout(() => {
+              setPhase('second');
+            }, 300);
+          }
+          return currentLetters;
+        });
+      }, 300);
+    } else {
+      // Фаза 2: удаляем буквы и показываем ОПЫТ на их месте
+      if (letter.removed) return;
+      
+      setIsHitting(true);
+      trackGameHit(letter.char, index);
 
-    setTimeout(() => {
-      setIsHitting(false);
-      setLetters((currentLetters) => {
-        const allBroken = currentLetters.every((l) => l.broken);
-        if (allBroken) {
-          setTimeout(() => {
-            setIsComplete(true);
-            trackGameComplete();
-          }, 100);
-        }
-        return currentLetters;
-      });
-    }, 300);
+      const isEdgeLetter = index === 0 || index === 5; // К или С
+      
+      if (isEdgeLetter) {
+        // Крайние буквы просто исчезают
+        setLetters((prev) =>
+          prev.map((l, i) => (i === index ? { ...l, removed: true } : l))
+        );
+      } else {
+        // Остальные буквы исчезают, но появляется буква из ОПЫТ на их месте
+        setLetters((prev) =>
+          prev.map((l, i) => (i === index ? { ...l, removed: true } : l))
+        );
+      }
+
+      setTimeout(() => {
+        setIsHitting(false);
+        setLetters((currentLetters) => {
+          const allRemoved = currentLetters.every((l) => l.removed);
+          if (allRemoved) {
+            setTimeout(() => {
+              setIsComplete(true);
+              trackGameComplete();
+            }, 100);
+          }
+          return currentLetters;
+        });
+      }, 300);
+    }
   };
 
   const handleRetry = () => {
@@ -119,22 +182,21 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
       word.split('').map((char, index) => ({
         char,
         broken: false,
+        removed: false,
+        experienceChar: crisisToExperienceMap[index] || null,
         index,
       }))
     );
+    setPhase('first');
     setIsComplete(false);
     trackGameRetry();
   };
 
-  const handleSkip = () => {
-    trackGameSkip();
-    onNext();
-  };
 
   return (
     <section
       data-screen="4"
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 pt-32 relative overflow-hidden bg-white"
+      className={`min-h-screen flex flex-col items-center justify-center px-4 py-8 md:py-20 pt-16 md:pt-32 relative overflow-hidden bg-white ${!isComplete ? 'cursor-none' : ''}`}
     >
       <div className="relative z-10 max-w-4xl w-full text-center">
         <motion.h2
@@ -146,31 +208,81 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
           {screenContent.h2}
         </motion.h2>
 
-        <p className="text-gray-500 mb-8 text-sm">Нажимайте на буквы, чтобы разбить их</p>
+        <p className="text-gray-500 mb-4 md:mb-8 text-sm">Нажимайте на буквы, чтобы разбить их</p>
 
         <div
           ref={containerRef}
-          className="relative min-h-[300px] flex items-center justify-center mb-8"
+          className={`relative min-h-[300px] flex items-center justify-center mb-4 md:mb-8 ${!isComplete ? 'cursor-none' : ''}`}
         >
           {!isComplete ? (
-            <div className="flex gap-2 md:gap-3 items-center justify-center flex-wrap">
-              {letters.map((letter, index) => (
-                <motion.button
-                  key={index}
-                  onClick={() => handleHit(index)}
-                  disabled={letter.broken}
-                  className={`relative w-14 h-14 md:w-20 md:h-20 rounded-xl font-display font-bold text-3xl md:text-5xl transition-all ${
-                    letter.broken
-                      ? 'bg-gray-100 text-gray-300 scale-90'
-                      : 'bg-gray-900 text-white hover:bg-gray-800 cursor-pointer'
-                  }`}
-                  whileHover={!letter.broken ? { scale: 1.05 } : {}}
-                  whileTap={!letter.broken ? { scale: 0.95 } : {}}
-                  aria-label={`Разбить букву ${letter.char}`}
-                >
-                  {letter.char}
-                </motion.button>
-              ))}
+            <div className="flex gap-1 md:gap-3 items-center justify-center flex-wrap max-w-full px-2">
+              {letters.map((letter, index) => {
+                const isEdgeLetter = index === 0 || index === 5;
+                const showExperience = phase === 'second' && letter.removed && letter.experienceChar && !isEdgeLetter;
+                
+                if (letter.removed && isEdgeLetter) {
+                  // Крайние буквы просто исчезают, оставляя пустое место
+                  return (
+                    <div
+                      key={`empty-${index}`}
+                      className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20"
+                    />
+                  );
+                }
+                
+                return (
+                  <motion.div
+                    key={`letter-${index}`}
+                    className="relative flex items-center justify-center flex-shrink-0"
+                  >
+                    {showExperience ? (
+                      // Показываем букву из ОПЫТ (зеленый градиент)
+                      <motion.div
+                        className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-display font-bold text-xl sm:text-2xl md:text-5xl flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {letter.experienceChar}
+                      </motion.div>
+                    ) : (
+                      // Показываем букву из КРИЗИС (красный градиент)
+                      <motion.button
+                        onClick={() => handleHit(index)}
+                        disabled={phase === 'first' && letter.broken}
+                        className={`transition-all cursor-none flex items-center justify-center flex-shrink-0 ${
+                          letter.removed
+                            ? 'opacity-0 scale-0 pointer-events-none'
+                            : ''
+                        }`}
+                        style={{
+                          padding: 0,
+                        }}
+                        whileHover={!letter.removed && !(phase === 'first' && letter.broken) ? {} : {}}
+                        whileTap={!letter.removed && !(phase === 'first' && letter.broken) ? {} : {}}
+                        aria-label={`Разбить букву ${letter.char}`}
+                        animate={
+                          letter.removed
+                            ? { opacity: 0, scale: 0 }
+                            : {}
+                        }
+                      >
+                        <div
+                          className={`w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-lg sm:rounded-xl font-display font-bold text-xl sm:text-2xl md:text-5xl flex items-center justify-center ${
+                            letter.broken
+                              ? phase === 'first'
+                                ? 'bg-gray-100 text-gray-300 scale-90'
+                                : 'bg-gray-100 text-gray-300 scale-90'
+                              : 'bg-gradient-to-r from-red-600 to-red-800 text-white'
+                          }`}
+                        >
+                          {letter.char}
+                        </div>
+                      </motion.button>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           ) : (
             <motion.div
@@ -179,11 +291,11 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
               transition={{ duration: prefersReducedMotion ? 0.1 : 0.4 }}
               className="space-y-4"
             >
-              <div className="flex gap-2 md:gap-3 items-center justify-center">
+              <div className="flex gap-1 sm:gap-2 md:gap-3 items-center justify-center flex-wrap">
                 {screenContent.resultWord.split('').map((char, index) => (
                   <div
                     key={index}
-                    className="w-14 h-14 md:w-20 md:h-20 rounded-xl bg-blue-600 text-white font-display font-bold text-3xl md:text-5xl flex items-center justify-center"
+                    className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-display font-bold text-xl sm:text-3xl md:text-5xl flex items-center justify-center"
                   >
                     {char}
                   </div>
@@ -199,56 +311,45 @@ export default function Screen4_GameCrisis({ onNext }: Screen4_GameCrisisProps) 
             <motion.div
               className="absolute pointer-events-none z-20"
               style={{
-                left: hammerPosition.x - 20,
-                top: hammerPosition.y - 20,
+                left: hammerPosition.x - 40,
+                top: hammerPosition.y - 40,
               }}
               animate={
                 isHitting
                   ? {
                       rotate: [0, -30, 0],
-                      scale: [1, 1.2, 1],
+                      scale: [1, 1.3, 1],
                     }
                   : {}
               }
               transition={{ duration: 0.2 }}
             >
-              <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center">
-                <Hammer className="w-5 h-5 text-white" />
+              <div className="text-6xl md:text-7xl select-none">
+                🔨
               </div>
             </motion.div>
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          {isComplete ? (
-            <>
-              <button
-                onClick={handleRetry}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
-                aria-label="Ещё раз"
-              >
-                <RotateCcw className="w-4 h-4" />
-                {screenContent.buttons.retry}
-              </button>
-              <button
-                onClick={onNext}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
-              >
-                {screenContent.buttons.next}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </>
-          ) : (
+        {isComplete && (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button
-              onClick={handleSkip}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
-              aria-label="Пропустить игру"
+              onClick={handleRetry}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-800 to-cyan-400 text-white rounded-lg hover:from-blue-700 hover:to-cyan-300 transition-all font-medium text-sm"
+              aria-label="Ещё раз"
             >
-              <SkipForward className="w-4 h-4" />
-              {screenContent.buttons.skip}
+              <RotateCcw className="w-4 h-4" />
+              {screenContent.buttons.retry}
             </button>
-          )}
-        </div>
+            <button
+              onClick={onNext}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-800 to-cyan-400 text-white rounded-lg hover:from-blue-700 hover:to-cyan-300 transition-all font-medium text-sm"
+            >
+              {screenContent.buttons.next}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

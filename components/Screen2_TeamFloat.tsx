@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Pause, Play } from 'lucide-react';
+import { Check } from 'lucide-react';
 import content from '@/content/landing.ru.json';
-import { trackTogglePauseTeamPhotos } from '@/lib/analytics';
 
 interface FloatingPhoto {
   id: number;
@@ -19,7 +18,6 @@ interface FloatingPhoto {
 
 export default function Screen2_TeamFloat() {
   const screenContent = content.screens.s2;
-  const [isPaused, setIsPaused] = useState(false);
   const [photos, setPhotos] = useState<FloatingPhoto[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,7 +55,7 @@ export default function Screen2_TeamFloat() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion || isPaused) return;
+    if (prefersReducedMotion) return;
 
     const animate = () => {
       setPhotos((prev) =>
@@ -85,25 +83,19 @@ export default function Screen2_TeamFloat() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPaused, prefersReducedMotion]);
-
-  const handlePause = () => {
-    const newPaused = !isPaused;
-    setIsPaused(newPaused);
-    trackTogglePauseTeamPhotos(newPaused);
-  };
+  }, [prefersReducedMotion]);
 
   return (
     <section
       data-screen="2"
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-20 pt-32 relative overflow-hidden bg-white"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 md:py-20 pt-16 md:pt-32 relative overflow-hidden bg-white"
     >
       <div className="relative z-10 max-w-3xl w-full">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-center mb-4 text-gray-900"
+          className="text-2xl md:text-4xl lg:text-5xl font-display font-bold text-center mb-3 md:mb-4 text-gray-900"
         >
           {screenContent.h2}
         </motion.h2>
@@ -113,12 +105,12 @@ export default function Screen2_TeamFloat() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ delay: 0.2 }}
-          className="text-lg text-center mb-10 text-gray-600 leading-relaxed"
+          className="text-lg text-center mb-6 md:mb-10 text-gray-600 leading-relaxed"
         >
           {screenContent.text}
         </motion.p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 md:mb-10">
           {screenContent.points.map((point, index) => (
             <motion.div
               key={index}
@@ -134,17 +126,6 @@ export default function Screen2_TeamFloat() {
               <p className="text-gray-700 text-sm">{point}</p>
             </motion.div>
           ))}
-        </div>
-
-        <div className="flex justify-center">
-          <button
-            onClick={handlePause}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-            aria-label={isPaused ? 'Возобновить анимацию' : 'Пауза анимации'}
-          >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {screenContent.pause}
-          </button>
         </div>
       </div>
 
@@ -166,7 +147,7 @@ export default function Screen2_TeamFloat() {
                   rotate: prefersReducedMotion ? 0 : photo.rotation,
                 }}
                 animate={
-                  !prefersReducedMotion && !isPaused
+                  !prefersReducedMotion
                     ? {
                         x: [0, 5, -5, 0],
                         y: [0, -5, 5, 0],

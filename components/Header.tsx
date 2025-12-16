@@ -27,7 +27,7 @@ export default function Header({ onOpenGift }: HeaderProps) {
         </div>
         <button
           onClick={handleOpenGift}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-800 to-cyan-400 text-white rounded-lg hover:from-blue-700 hover:to-cyan-300 transition-all text-sm font-medium"
           aria-label="Открыть послание"
         >
           <Gift className="w-4 h-4" />
