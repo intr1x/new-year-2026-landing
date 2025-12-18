@@ -103,8 +103,8 @@ export default function Screen5_CandyReveal() {
                 className="flex flex-col items-center gap-4 cursor-pointer group"
                 onClick={handleOpen}
               >
-                <div className="relative w-32 h-32 group-hover:scale-110 transition-transform duration-300">
-                  {/* Конфета в обертке */}
+                <div className="relative w-48 h-48 md:w-56 md:h-56 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                  {/* Конфета эмоджи */}
                   <motion.div
                     animate={{
                       y: [0, -6, 0],
@@ -115,53 +115,9 @@ export default function Screen5_CandyReveal() {
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
-                    className="relative w-full h-full"
+                    className="relative w-full h-full flex items-center justify-center"
                   >
-                    {/* Тело конфеты */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-red-400 to-pink-500 rounded-full shadow-2xl border-2 border-pink-300">
-                      {/* Спиральный узор на обертке */}
-                      <div className="absolute inset-2 rounded-full border-2 border-white/50" style={{
-                        clipPath: 'polygon(50% 0%, 0% 100%, 50% 50%, 100% 100%)'
-                      }}></div>
-                      <div className="absolute inset-4 rounded-full border border-white/30"></div>
-                      
-                      {/* Блики для объема */}
-                      <div className="absolute top-3 left-4 w-6 h-6 bg-white/50 rounded-full blur-sm"></div>
-                      <div className="absolute bottom-4 right-3 w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
-                    </div>
-                    
-                    {/* Верхний хвостик обертки */}
-                    <motion.div
-                      animate={{
-                        rotate: [0, 10, -10, 0],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10"
-                    >
-                      <div className="w-2 h-8 bg-gradient-to-b from-pink-300 via-pink-200 to-pink-100 rounded-full shadow-md"></div>
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-pink-200 rounded-full"></div>
-                    </motion.div>
-                    
-                    {/* Нижний хвостик обертки */}
-                    <motion.div
-                      animate={{
-                        rotate: [0, -10, 10, 0],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.3,
-                      }}
-                      className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 z-10"
-                    >
-                      <div className="w-2 h-8 bg-gradient-to-t from-pink-300 via-pink-200 to-pink-100 rounded-full shadow-md"></div>
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-pink-200 rounded-full"></div>
-                    </motion.div>
+                    <span className="text-9xl md:text-[12rem]">🍬</span>
                   </motion.div>
                 </div>
                 <p className="text-gray-500 text-sm">{screenContent.hint}</p>
@@ -182,58 +138,20 @@ export default function Screen5_CandyReveal() {
                   rotate: { duration: 0.6, repeat: Infinity },
                 }}
                 exit={{ opacity: 0 }}
-                className="relative w-32 h-32"
+                className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center"
               >
-                {/* Конфета с разворачивающейся оберткой */}
-                <div className="relative w-full h-full">
-                  {/* Тело конфеты (остается) */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-red-400 to-pink-500 rounded-full shadow-xl border-2 border-pink-300">
-                    <div className="absolute top-3 left-4 w-6 h-6 bg-white/50 rounded-full blur-sm"></div>
-                  </div>
-                  
-                  {/* Верхний хвостик разворачивается */}
-                  <motion.div
-                    initial={{ rotate: 0, y: 0 }}
-                    animate={{ 
-                      rotate: [0, 180, 360],
-                      y: [-20, -40, -60],
-                      opacity: [1, 0.5, 0],
-                    }}
-                    transition={{ duration: 0.8 }}
-                    className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10 origin-bottom"
-                  >
-                    <div className="w-2 h-8 bg-gradient-to-b from-pink-300 via-pink-200 to-pink-100 rounded-full"></div>
-                  </motion.div>
-                  
-                  {/* Нижний хвостик разворачивается */}
-                  <motion.div
-                    initial={{ rotate: 0, y: 0 }}
-                    animate={{ 
-                      rotate: [0, -180, -360],
-                      y: [20, 40, 60],
-                      opacity: [1, 0.5, 0],
-                    }}
-                    transition={{ duration: 0.8 }}
-                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 z-10 origin-top"
-                  >
-                    <div className="w-2 h-8 bg-gradient-to-t from-pink-300 via-pink-200 to-pink-100 rounded-full"></div>
-                  </motion.div>
-                  
-                  {/* Обертка разворачивается (спираль) */}
+                {/* Конфета эмоджи с анимацией открытия */}
                   <motion.div
                     initial={{ scale: 1, rotate: 0 }}
                     animate={{ 
-                      scale: [1, 1.2, 1.5],
+                    scale: [1, 1.2, 1.1],
                       rotate: [0, 180, 360],
-                      opacity: [1, 0.3, 0],
                     }}
                     transition={{ duration: 0.8 }}
-                    className="absolute inset-0 rounded-full border-2 border-white/50"
-                    style={{
-                      clipPath: 'polygon(50% 0%, 0% 100%, 50% 50%, 100% 100%)'
-                    }}
-                  ></motion.div>
-                </div>
+                  className="flex items-center justify-center"
+                >
+                  <span className="text-9xl md:text-[12rem]">🍬</span>
+                </motion.div>
               </motion.div>
             )}
 
@@ -309,54 +227,53 @@ export default function Screen5_CandyReveal() {
               >
                 {/* Развернутая смятая бумажка */}
                 <div className="relative w-full min-h-[300px] md:min-h-[400px]">
-                  {/* Основная бумажка (развернутая) */}
-                  <motion.div
-                    initial={{ rotate: -2, scale: 0.95 }}
-                    animate={{ rotate: 0, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="absolute inset-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 rounded-lg shadow-2xl border-2 border-amber-200/50 p-8 md:p-12"
+                  {/* Третья бумажка (задний план) */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-200 via-yellow-200 to-amber-300 rounded-lg shadow-lg z-0"
                     style={{
-                      clipPath: 'polygon(2% 1%, 99% 2%, 98% 97%, 1% 99%)',
+                      transform: 'rotate(-1deg) scale(0.96) translateY(8px)',
+                      clipPath: 'polygon(0% 2%, 97% 0%, 98% 98%, 2% 100%)',
                     }}
-                  >
-                    {/* Складки и морщины (более заметные) */}
-                    <div className="absolute top-1/4 left-0 right-0 h-0.5 bg-amber-300/50 transform rotate-3"></div>
-                    <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-amber-300/50 transform -rotate-2"></div>
-                    <div className="absolute top-3/4 left-0 right-0 h-0.5 bg-amber-300/50 transform rotate-4"></div>
-                    <div className="absolute top-0 left-1/4 bottom-0 w-0.5 bg-amber-300/50 transform rotate-6"></div>
-                    <div className="absolute top-0 left-3/4 bottom-0 w-0.5 bg-amber-300/50 transform -rotate-3"></div>
-                    
-                    {/* Тени от складок */}
-                    <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-amber-300/15 rounded-full blur-2xl"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-amber-300/15 rounded-full blur-2xl"></div>
-                    <div className="absolute top-1/2 left-1/2 w-16 h-16 bg-amber-300/10 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                    
-                    {/* Текст послания */}
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="relative z-10 text-lg md:text-2xl text-amber-900 leading-relaxed mb-6 md:mb-8 font-handwriting text-center"
-                    >
-                  «{selectedMessage}»
-                    </motion.p>
-                  </motion.div>
+                  ></div>
                   
                   {/* Вторая бумажка (для объема) */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-200 rounded-lg shadow-xl border border-amber-300/30"
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-200 rounded-lg shadow-xl border border-amber-300/30 z-10"
                     style={{
                       transform: 'rotate(1deg) scale(0.98) translateY(4px)',
                       clipPath: 'polygon(1% 0%, 98% 1%, 99% 98%, 0% 99%)',
                     }}
                   ></div>
                   
-                  {/* Третья бумажка (задний план) */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-200 via-yellow-200 to-amber-300 rounded-lg shadow-lg"
+                  {/* Основная бумажка (развернутая) */}
+                  <motion.div
+                    initial={{ rotate: -2, scale: 0.95 }}
+                    animate={{ rotate: 0, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="absolute inset-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 rounded-lg shadow-2xl border-2 border-amber-200/50 p-6 md:p-10 z-20 flex items-center justify-center"
                     style={{
-                      transform: 'rotate(-1deg) scale(0.96) translateY(8px)',
-                      clipPath: 'polygon(0% 2%, 97% 0%, 98% 98%, 2% 100%)',
+                      clipPath: 'polygon(2% 1%, 99% 2%, 98% 97%, 1% 99%)',
                     }}
-                  ></div>
+                  >
+                    {/* Текст послания */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="relative z-10 text-xl md:text-3xl text-amber-950 leading-relaxed font-handwriting text-center font-medium"
+                    >
+                      {(() => {
+                        const firstDotIndex = selectedMessage.indexOf('.');
+                        if (firstDotIndex === -1) return <p>{selectedMessage}</p>;
+                        const firstSentence = selectedMessage.slice(0, firstDotIndex + 1);
+                        const rest = selectedMessage.slice(firstDotIndex + 1).trim();
+                        return (
+                          <>
+                            <p>{firstSentence}</p>
+                            {rest && <p className="mt-4 md:mt-6">{rest}</p>}
+                          </>
+                        );
+                      })()}
+                    </motion.div>
+                  </motion.div>
                 </div>
 
                 {/* Кнопка действия */}
