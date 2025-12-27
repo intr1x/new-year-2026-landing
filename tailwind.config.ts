@@ -8,6 +8,13 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          blue: '#0245EE',
+          light: '#4070FF',
+          dark: '#0131A9',
+        },
+      },
       fontFamily: {
         display: ['var(--font-rubik)', 'sans-serif'],
         handwriting: ['var(--font-caveat)', 'cursive'],

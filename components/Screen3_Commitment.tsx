@@ -17,7 +17,7 @@ export default function Screen3_Commitment({ onNext }: Screen3_CommitmentProps) 
   return (
     <section
       data-screen="3"
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 md:py-20 pt-16 md:pt-32 relative overflow-hidden bg-gradient-to-b from-white to-gray-50"
+      className="h-screen flex flex-col items-center justify-center px-4 py-8 md:py-20 pt-16 md:pt-32 relative overflow-hidden bg-gradient-to-b from-white to-gray-50"
     >
       <div className="relative z-10 max-w-4xl w-full">
         <motion.h2
@@ -48,7 +48,7 @@ export default function Screen3_Commitment({ onNext }: Screen3_CommitmentProps) 
         >
           <button
             onClick={onNext}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-cyan-400 text-white rounded-lg hover:from-blue-700 hover:to-cyan-300 transition-all text-base font-medium"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-blue to-brand-light text-white rounded-lg hover:from-brand-dark hover:to-brand-blue transition-all text-base font-medium shadow-lg shadow-brand-blue/25"
           >
             {screenContent.cta}
             <ArrowRight className="w-4 h-4" />

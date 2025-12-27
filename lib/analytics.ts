@@ -56,9 +56,9 @@ export function trackGameSkip() {
   });
 }
 
-export function trackCandyOpen() {
+export function trackCoinScratch() {
   sendEvent({
-    name: 'candy_open',
+    name: 'coin_scratch',
   });
 }
 

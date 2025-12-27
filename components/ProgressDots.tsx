@@ -22,7 +22,7 @@ export default function ProgressDots({
           onClick={() => onScreenClick(screen)}
           className={`w-3 h-3 rounded-full transition-all ${
             activeScreen === screen
-              ? 'bg-blue-600 scale-125'
+              ? 'bg-brand-blue scale-125'
               : 'bg-gray-300 hover:bg-gray-400'
           }`}
           aria-label={`Перейти к экрану ${screen}`}
