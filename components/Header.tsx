@@ -1,6 +1,7 @@
 'use client';
 
 import { Gift } from 'lucide-react';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { trackClick } from '@/lib/analytics';
 import content from '@/content/landing.ru.json';
 
@@ -16,10 +17,15 @@ export default function Header({ onOpenGift }: HeaderProps) {
 
   const handleLogoClick = () => {
     trackClick('header_logo_to_top');
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      smoother.scrollTo(0, true);
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   };
 
   return (

@@ -1,45 +1,119 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import content from '@/content/landing.ru.json';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface Screen1_ContextProps {
   onNext: () => void;
 }
 
 export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const yearRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const screenContent = content.screens.s1;
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: prefersReducedMotion ? 0.1 : 0.3,
-      },
-    }),
-  };
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const title = containerRef.current?.querySelector('h1');
+
+      // 0. Красивая анимация появления заголовка
+      if (title) {
+        gsap.fromTo(title, 
+          {
+            opacity: 0,
+            scale: 0.5,
+            y: 100,
+            rotateX: -90,
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 1.4,
+            ease: 'expo.out',
+            delay: 0.5,
+            clearProps: 'y,scale,rotateX', // Очищаем свойства после анимации
+          }
+        );
+      }
+
+      // 1. Анимация 2025 (уменьшение)
+      gsap.to(yearRef.current, {
+        scale: 0.15,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // 2. Анимация исчезновения заголовка при скролле (fromTo для точного контроля)
+      if (title) {
+        gsap.fromTo(title, 
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+          },
+          {
+            opacity: 0,
+            y: -100,
+            scale: 0.8,
+            rotateX: 90,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: '50% top',
+              scrub: true,
+            }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
 
   return (
     <section
+      ref={sectionRef}
       data-screen="1"
       className="h-screen flex flex-col items-center relative overflow-hidden bg-gradient-to-b from-gray-50 to-white pt-20 md:pt-32"
     >
       {/* Background 2025 */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none -z-0 overflow-hidden">
-        <span className="text-[30vw] md:text-[45vw] font-display font-bold text-gray-400/10 leading-none">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+        <span
+          ref={yearRef}
+          className="text-[30vw] md:text-[45vw] font-display font-bold text-gray-400 leading-none will-change-transform opacity-30"
+        >
           2025
         </span>
       </div>
 
-      {/* Pulsing Heart - Absolute positioned to not interfere with text flow */}
-      <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+      {/* Pulsing Heart */}
+      <div className="absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -47,9 +121,10 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
           whileHover={{
             scale: [1, 1.2, 1.1, 1.15, 1],
             transition: {
-              duration: 0.8,
+              duration: 0.6,
               repeat: Infinity,
               repeatType: "loop",
+              repeatDelay: 0.8,
               ease: "easeInOut",
               times: [0, 0.2, 0.4, 0.6, 1]
             }
@@ -71,69 +146,31 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
         </motion.div>
       </div>
 
-      <div className="relative z-10 max-w-4xl w-full flex flex-col items-center justify-between h-full pb-12 md:pb-24">
-        {/* Top: Curved Text */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0.1 : 0.5 }}
-          className="w-full"
-        >
-          <svg viewBox="0 0 1000 350" className="w-full h-auto overflow-visible">
-            <defs>
-              <path
-                id="textCurve"
-                d="M 100,300 A 400,250 0 0,1 900,300"
-              />
-            </defs>
-            <text className="font-display font-bold fill-gray-900 uppercase">
-              <textPath
-                xlinkHref="#textCurve"
-                startOffset="50%"
-                textAnchor="middle"
-                style={{ fontSize: '90px' }}
-              >
-                {screenContent.h1}
-              </textPath>
-            </text>
-          </svg>
-        </motion.div>
+      <div className="relative z-10 max-w-7xl w-full flex flex-col items-center justify-between h-full pb-12 md:pb-24">
+        {/* Заголовок в одну линию */}
+        <div ref={containerRef} className="w-full text-center px-4 mt-20" style={{ perspective: '1000px' }}>
+          <h1 className="font-display font-bold text-gray-900 uppercase text-[40px] md:text-[80px] lg:text-[100px] leading-none opacity-0 will-change-transform">
+            {screenContent.h1}
+          </h1>
+        </div>
 
-        {/* Bottom part: Subtitle, Bullets, and Button */}
+        {/* Bottom part */}
         <div className="flex flex-col items-center gap-8 w-full">
           {screenContent.sub && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: prefersReducedMotion ? 0.1 : 0.5 }}
+              transition={{ delay: 0.2 }}
               className="text-lg md:text-xl text-center text-gray-600 max-w-2xl mx-auto"
             >
               {screenContent.sub}
             </motion.p>
           )}
 
-          {screenContent.bullets && screenContent.bullets.length > 0 && (
-            <ul className="max-w-2xl mx-auto space-y-3">
-              {screenContent.bullets.map((bullet, index) => (
-                <motion.li
-                  key={index}
-                  custom={index}
-                  initial="hidden"
-                  animate="visible"
-                  variants={cardVariants}
-                  className="flex items-start gap-3 text-gray-700"
-                >
-                  <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-gray-400 mt-2" />
-                  <span className="leading-relaxed">{bullet}</span>
-                </motion.li>
-              ))}
-            </ul>
-          )}
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: prefersReducedMotion ? 0.1 : 0.5 }}
+            transition={{ delay: 0.8 }}
             className="flex justify-center"
           >
             <button

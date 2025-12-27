@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import content from '@/content/landing.ru.json';
 
 interface FloatingPhoto {
@@ -18,10 +20,13 @@ interface FloatingPhoto {
 }
 
 export default function Screen2_TeamFloat() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const photosRef = useRef<HTMLDivElement>(null);
+
   const screenContent = content.screens.s2;
   const [photos, setPhotos] = useState<FloatingPhoto[]>([]);
   const [isMounted, setIsMounted] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -48,7 +53,7 @@ export default function Screen2_TeamFloat() {
       y: Math.random() * 100,
       vx: (Math.random() - 0.5) * 0.015,
       vy: (Math.random() - 0.5) * 0.015,
-      size: 60 + Math.random() * 40, // Slightly larger photos
+      size: 60 + Math.random() * 40,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 0.3,
       imageUrl: `https://i.pravatar.cc/150?u=team-${i}`,
@@ -87,8 +92,50 @@ export default function Screen2_TeamFloat() {
     };
   }, [prefersReducedMotion]);
 
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      // Параллакс для всех фото фона при скролле
+      gsap.to(photosRef.current, {
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        },
+        y: -100,
+        ease: 'none',
+      });
+
+      // Анимация появления карточек по очереди
+      const cards = gsap.utils.toArray('.team-card');
+      cards.forEach((card: any, i: number) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, x: 50, rotate: 5 },
+          {
+            opacity: 1,
+            x: 0,
+            rotate: (i % 2 === 0 ? 1 : -1) * (i + 1),
+            duration: 0.8,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion, isMounted]);
+
   return (
     <section
+      ref={sectionRef}
       data-screen="2"
       className="h-screen flex flex-col items-center justify-center px-4 py-8 md:py-20 pt-16 md:pt-32 relative overflow-hidden bg-white"
     >
@@ -117,19 +164,14 @@ export default function Screen2_TeamFloat() {
           </div>
 
           {/* Правая колонка: карточки с наезжанием */}
-          <div className="flex-1 relative h-[400px] lg:h-[500px] w-full max-w-md">
+          <div ref={cardsRef} className="flex-1 relative h-[400px] lg:h-[500px] w-full max-w-md">
             {screenContent.points.map((point, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, x: 50, rotate: 5 }}
-                whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ delay: index * 0.15, type: 'spring', stiffness: 100 }}
-                className="absolute w-full bg-white shadow-xl rounded-2xl p-6 border border-gray-100"
+                className="team-card absolute w-full bg-white shadow-xl rounded-2xl p-6 border border-gray-100"
                 style={{
                   top: `${index * 80}px`,
                   zIndex: screenContent.points.length - index,
-                  transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (index + 1)}deg)`,
                 }}
               >
                 <div className="flex items-start gap-4">
@@ -138,7 +180,7 @@ export default function Screen2_TeamFloat() {
                   </div>
                   <p className="text-gray-700 text-base md:text-lg font-medium leading-snug">{point}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -146,7 +188,7 @@ export default function Screen2_TeamFloat() {
 
       {isMounted && (
         <div
-          ref={containerRef}
+          ref={photosRef}
           className="absolute inset-0 overflow-hidden pointer-events-none opacity-40"
         >
           <AnimatePresence>
