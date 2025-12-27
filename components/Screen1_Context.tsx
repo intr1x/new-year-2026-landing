@@ -33,24 +33,51 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
 
       // 0. Красивая анимация появления заголовка
       if (title) {
-        gsap.fromTo(title, 
+        const tl = gsap.timeline({ delay: 0.5 });
+
+        // 1. Анимация появления
+        tl.fromTo(title, 
           {
-            opacity: 0,
+            autoAlpha: 0,
             scale: 0.5,
             y: 100,
             rotateX: -90,
           },
           {
-            opacity: 1,
+            autoAlpha: 1,
             scale: 1,
             y: 0,
             rotateX: 0,
             duration: 1.4,
             ease: 'expo.out',
-            delay: 0.5,
-            clearProps: 'y,scale,rotateX', // Очищаем свойства после анимации
           }
         );
+
+        // 2. Анимация скролла (создаем её только когда заголовок уже появился)
+        tl.add(() => {
+          gsap.fromTo(title, 
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              rotateX: 0,
+            },
+            {
+              autoAlpha: 0,
+              y: -100,
+              scale: 0.8,
+              rotateX: 90,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: sectionRef.current,
+                start: 'top top',
+                end: '50% top',
+                scrub: true,
+                immediateRender: false,
+              }
+            }
+          );
+        });
       }
 
       // 1. Анимация 2025 (уменьшение)
@@ -66,31 +93,6 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
           invalidateOnRefresh: true,
         }
       });
-
-      // 2. Анимация исчезновения заголовка при скролле (fromTo для точного контроля)
-      if (title) {
-        gsap.fromTo(title, 
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotateX: 0,
-          },
-          {
-            opacity: 0,
-            y: -100,
-            scale: 0.8,
-            rotateX: 90,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top top',
-              end: '50% top',
-              scrub: true,
-            }
-          }
-        );
-      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -149,7 +151,9 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
       <div className="relative z-10 max-w-7xl w-full flex flex-col items-center justify-between h-full pb-12 md:pb-24">
         {/* Заголовок в одну линию */}
         <div ref={containerRef} className="w-full text-center px-4 mt-20" style={{ perspective: '1000px' }}>
-          <h1 className="font-display font-bold text-gray-900 uppercase text-[40px] md:text-[80px] lg:text-[100px] leading-none opacity-0 will-change-transform">
+          <h1 
+            className="font-display font-bold text-gray-900 uppercase text-[40px] md:text-[80px] lg:text-[100px] leading-none will-change-transform opacity-0"
+          >
             {screenContent.h1}
           </h1>
         </div>
