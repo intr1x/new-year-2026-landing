@@ -9,7 +9,7 @@ export default function ProgressDots({
   activeScreen,
   onScreenClick,
 }: ProgressDotsProps) {
-  const screens = [1, 2, 3, 4, 5];
+  const screens = [1, 2, 3, 4, 5, 6];
 
   return (
     <nav
@@ -20,10 +20,12 @@ export default function ProgressDots({
         <button
           key={screen}
           onClick={() => onScreenClick(screen)}
-          className={`w-3 h-3 rounded-full transition-all ${
+          className={`w-3 h-3 rounded-full transition-all duration-500 ${
             activeScreen === screen
-              ? 'bg-brand-blue scale-125'
-              : 'bg-gray-300 hover:bg-gray-400'
+              ? 'bg-brand-blue scale-150 shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+              : [1, 3, 6].includes(activeScreen)
+                ? 'bg-white/30 hover:bg-white/60' 
+                : 'bg-gray-400 hover:bg-gray-600'
           }`}
           aria-label={`Перейти к экрану ${screen}`}
           aria-current={activeScreen === screen ? 'step' : undefined}

@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import content from '@/content/landing.ru.json';
@@ -31,37 +31,42 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
     const ctx = gsap.context(() => {
       const title = containerRef.current?.querySelector('h1');
 
-      // 0. Красивая анимация появления заголовка
       if (title) {
         const tl = gsap.timeline({ delay: 0.5 });
-
-        // 1. Анимация появления
-        tl.fromTo(title, 
-          {
-            autoAlpha: 0,
-            scale: 0.5,
-            y: 100,
-            rotateX: -90,
-          },
-          {
-            autoAlpha: 1,
-            scale: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 1.4,
-            ease: 'expo.out',
-          }
+        
+        // Анимация года 2025
+        tl.fromTo(yearRef.current,
+          { autoAlpha: 0, scale: 0.8, y: 50 },
+          { autoAlpha: 1, scale: 1, y: 0, duration: 1.5, ease: 'expo.out' },
+          0 // Запуск одновременно с началом таймлайна
         );
 
-        // 2. Анимация скролла (создаем её только когда заголовок уже появился)
+        // Анимация заголовка
+        tl.fromTo(title, 
+          { autoAlpha: 0, scale: 0.5, y: 100, rotateX: -90 },
+          { autoAlpha: 1, scale: 1, y: 0, rotateX: 0, duration: 1.4, ease: 'expo.out' },
+          0.2 // Небольшая задержка после года
+        );
+
         tl.add(() => {
+          // Анимация года при скролле
+          gsap.to(yearRef.current, {
+            scale: 0.15,
+            opacity: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: true,
+              invalidateOnRefresh: true,
+              immediateRender: false,
+            }
+          });
+
+          // Анимация заголовка при скролле
           gsap.fromTo(title, 
-            {
-              autoAlpha: 1,
-              y: 0,
-              scale: 1,
-              rotateX: 0,
-            },
+            { autoAlpha: 1, y: 0, scale: 1, rotateX: 0 },
             {
               autoAlpha: 0,
               y: -100,
@@ -79,20 +84,6 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
           );
         });
       }
-
-      // 1. Анимация 2025 (уменьшение)
-      gsap.to(yearRef.current, {
-        scale: 0.15,
-        opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        }
-      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -102,19 +93,17 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
     <section
       ref={sectionRef}
       data-screen="1"
-      className="h-screen flex flex-col items-center relative overflow-hidden bg-gradient-to-b from-gray-50 to-white pt-20 md:pt-32"
+      className="h-screen flex flex-col items-center relative overflow-hidden bg-slate-950 pt-20 md:pt-32"
     >
-      {/* Background 2025 */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
         <span
           ref={yearRef}
-          className="text-[30vw] md:text-[45vw] font-display font-bold text-gray-400 leading-none will-change-transform opacity-30"
+          className="text-[30vw] md:text-[45vw] font-display font-bold text-white/10 leading-none will-change-transform opacity-0"
         >
           2025
         </span>
       </div>
 
-      {/* Pulsing Heart */}
       <div className="absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
@@ -131,7 +120,7 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
               times: [0, 0.2, 0.4, 0.6, 1]
             }
           }}
-          className="cursor-pointer drop-shadow-2xl pointer-events-auto"
+          className="cursor-pointer drop-shadow-[0_0_30px_rgba(255,77,77,0.3)] pointer-events-auto"
         >
           <svg width="240" height="240" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -149,43 +138,30 @@ export default function Screen1_Context({ onNext }: Screen1_ContextProps) {
       </div>
 
       <div className="relative z-10 max-w-7xl w-full flex flex-col items-center justify-between h-full pb-12 md:pb-24">
-        {/* Заголовок в одну линию */}
         <div ref={containerRef} className="w-full text-center px-4 mt-20" style={{ perspective: '1000px' }}>
-          <h1 
-            className="font-display font-bold text-gray-900 uppercase text-[40px] md:text-[80px] lg:text-[100px] leading-none will-change-transform opacity-0"
-          >
+          <h1 className="font-display font-bold text-white uppercase text-[40px] md:text-[80px] lg:text-[100px] leading-none will-change-transform opacity-0">
             {screenContent.h1}
           </h1>
         </div>
 
-        {/* Bottom part */}
         <div className="flex flex-col items-center gap-8 w-full">
           {screenContent.sub && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-center text-gray-600 max-w-2xl mx-auto"
+              className="text-lg md:text-xl text-center text-gray-400 max-w-2xl mx-auto"
             >
               {screenContent.sub}
             </motion.p>
           )}
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="flex justify-center"
-          >
-            <button
-              onClick={onNext}
-              className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-blue to-brand-light text-white rounded-full hover:from-brand-dark hover:to-brand-blue transition-all text-lg font-medium shadow-lg shadow-brand-blue/25 hover:scale-105 active:scale-95"
-            >
-              {screenContent.cta}
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </motion.div>
         </div>
+      </div>
+      
+      {/* Фоновое свечение */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden opacity-50">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-blue/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-500/10 rounded-full blur-[120px]" />
       </div>
     </section>
   );

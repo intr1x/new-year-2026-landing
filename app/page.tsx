@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import ProgressDots from '@/components/ProgressDots';
 import Screen1_Context from '@/components/Screen1_Context';
 import Screen2_TeamFloat from '@/components/Screen2_TeamFloat';
+import Screen2_5_Stats from '@/components/Screen2_5_Stats';
 import Screen3_Commitment from '@/components/Screen3_Commitment';
 import Screen4_CandyReveal from '@/components/Screen4_CandyReveal';
 import Screen5_Horse from '@/components/Screen5_Horse';
@@ -22,20 +23,28 @@ export default function Home() {
 
     const screens = gsap.utils.toArray('[data-screen]');
     
-    screens.forEach((screen: any, index: number) => {
+    screens.forEach((screen: any) => {
+      const screenNumber = parseInt(screen.getAttribute('data-screen') || '1');
+      
       ScrollTrigger.create({
         trigger: screen,
-        start: 'top 60%',
-        end: 'bottom 60%',
-        onToggle: (self) => {
-          if (self.isActive) {
-            const screenNumber = index + 1;
-            setActiveScreen(screenNumber);
-            trackScreenView(screenNumber);
-          }
+        start: 'top 50%',
+        end: 'bottom 50%',
+        onEnter: () => {
+          setActiveScreen(screenNumber);
+          trackScreenView(screenNumber);
+        },
+        onEnterBack: () => {
+          setActiveScreen(screenNumber);
+          trackScreenView(screenNumber);
         },
       });
     });
+
+    // Принудительное обновление после того, как все компоненты инициализируют свои ScrollTrigger
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
 
     return () => {
       ScrollTrigger.getAll().forEach((st) => st.kill());
@@ -43,6 +52,7 @@ export default function Home() {
   }, []);
 
   const scrollToScreen = (screenNumber: number) => {
+    setActiveScreen(screenNumber);
     const smoother = ScrollSmoother.get();
     if (smoother) {
       smoother.scrollTo(`[data-screen="${screenNumber}"]`, true, 'start top');
@@ -56,7 +66,7 @@ export default function Home() {
 
   return (
     <>
-      <Header onOpenGift={() => scrollToScreen(4)} />
+      <Header onOpenGift={() => scrollToScreen(5)} activeScreen={activeScreen} />
       <ProgressDots
         activeScreen={activeScreen}
         onScreenClick={scrollToScreen}
@@ -65,8 +75,9 @@ export default function Home() {
         <main className="relative">
           <Screen1_Context onNext={() => scrollToScreen(2)} />
           <Screen2_TeamFloat />
-          <Screen3_Commitment onNext={() => scrollToScreen(4)} />
-          <Screen4_CandyReveal onNext={() => scrollToScreen(5)} />
+          <Screen2_5_Stats />
+          <Screen3_Commitment onNext={() => scrollToScreen(5)} />
+          <Screen4_CandyReveal onNext={() => scrollToScreen(6)} />
           <Screen5_Horse />
         </main>
       </SmoothScroll>

@@ -64,18 +64,24 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
       await document.fonts.ready;
     }
 
-    const rect = container.getBoundingClientRect();
+    // Используем clientWidth/Height, так как они возвращают размер внутренней области (без границ)
+    // и не зависят от CSS-трансформаций (scale), в отличие от getBoundingClientRect
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    
+    // Принудительно задаем CSS-размеры, чтобы они точно совпадали с внутренней областью контейнера
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.scale(dpr, dpr);
       
-      const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
       gradient.addColorStop(0, '#ADB5BD');
       gradient.addColorStop(0.2, '#CED4DA');
       gradient.addColorStop(0.5, '#DEE2E6');
@@ -83,18 +89,18 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
       gradient.addColorStop(1, '#6C757D');
       
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, rect.width, rect.height);
+      ctx.fillRect(0, 0, width, height);
 
       for (let i = 0; i < 2000; i++) {
         ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.2})`;
-        ctx.fillRect(Math.random() * rect.width, Math.random() * rect.height, 1, 1);
+        ctx.fillRect(Math.random() * width, Math.random() * height, 1, 1);
       }
 
       const text = 'Сотри, чтобы получить';
       let fontSize = 44;
       ctx.font = `${fontSize}px Caveat, cursive`;
       
-      while (ctx.measureText(text).width > rect.width * 0.9 && fontSize > 20) {
+      while (ctx.measureText(text).width > width * 0.9 && fontSize > 20) {
         fontSize -= 2;
         ctx.font = `${fontSize}px Caveat, cursive`;
       }
@@ -102,15 +108,30 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text, rect.width / 2, rect.height / 2);
+      // Используем точный центр
+      ctx.fillText(text, width / 2, height / 2);
       
       ctx.globalCompositeOperation = 'destination-out';
     }
   }, []);
 
   useEffect(() => {
-    if (isMounted) initCanvas();
-  }, [isMounted, initCanvas]);
+    if (!isMounted) return;
+    
+    initCanvas();
+
+    const observer = new ResizeObserver(() => {
+      if (state === 'idle') {
+        initCanvas();
+      }
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isMounted, initCanvas, state]);
 
   const drawScratch = useCallback((x: number, y: number) => {
     const canvas = canvasRef.current;
@@ -141,15 +162,15 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
   const handleMove = useCallback((e: MouseEvent | TouchEvent) => {
     if (!isDrawing || state === 'revealed') return;
 
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
 
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
+    if (canvasRef.current) {
+      const rect = canvasRef.current.getBoundingClientRect();
       const x = clientX - rect.left;
       const y = clientY - rect.top;
       
-      if (x >= -20 && x <= rect.width + 20 && y >= -20 && y <= rect.height + 20) {
+      if (x >= -40 && x <= rect.width + 40 && y >= -40 && y <= rect.height + 40) {
         if (state === 'idle') {
           setState('scratching');
         }
@@ -194,24 +215,43 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
   };
 
   return (
-    <div data-screen="4">
+    <div data-screen="5">
       <section 
         ref={sectionRef}
         className="h-screen flex flex-col items-center justify-center px-4 py-8 md:py-16 relative overflow-hidden bg-white"
       >
-        <div className="relative z-10 max-w-7xl w-full">
+        {/* Фоновые декоративные элементы */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 2, delay: 0.6 }}
+            className="absolute -bottom-20 -left-20 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl" 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 2, delay: 0.8 }}
+            className="absolute -top-20 -right-20 w-64 h-64 bg-brand-light/10 rounded-full blur-3xl" 
+          />
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10 max-w-7xl w-full"
+        >
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
           
           {/* Левая колонка: Заголовок и кнопка перехода */}
           <div className="flex-1 max-w-xl text-left">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-5xl lg:text-[72px] font-display font-bold mb-8 md:mb-12 text-gray-900 leading-[1.1] whitespace-pre-line"
-            >
+            <h2 className="text-3xl md:text-5xl lg:text-[72px] font-display font-bold mb-8 md:mb-12 text-gray-900 leading-[1.1] whitespace-pre-line">
               {screenContent.h2}
-            </motion.h2>
+            </h2>
 
             <AnimatePresence>
               {state === 'revealed' && onNext && (
@@ -238,10 +278,10 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
               ref={containerRef}
               onMouseDown={() => setIsDrawing(true)}
               onTouchStart={() => setIsDrawing(true)}
-              className="relative w-full aspect-[16/10] bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-8 border-white cursor-crosshair"
+              className="relative w-full aspect-[16/10] bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden cursor-crosshair"
             >
               {/* Текст послания */}
-              <div className="absolute inset-0 flex items-center justify-center px-8 py-10 md:px-12 bg-white">
+              <div className="absolute inset-8 flex items-center justify-center bg-white">
                 <p className={`${getFontSizeClass(selectedMessage)} text-gray-900 font-handwriting text-left leading-tight w-full`}>
                   {selectedMessage || '...'}
                 </p>
@@ -252,12 +292,22 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
                 {state !== 'revealed' && (
                   <motion.canvas
                     ref={canvasRef}
+                    initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.8 }}
-                    className="absolute inset-0 z-20 touch-none"
+                    className="absolute top-0 left-0 z-20 touch-none"
+                    style={{ 
+                      // Гарантируем, что canvas занимает всю внутреннюю площадь
+                      width: '100%',
+                      height: '100%',
+                      display: 'block'
+                    }}
                   />
                 )}
               </AnimatePresence>
+              
+              {/* Декоративная рамка поверх всего */}
+              <div className="absolute inset-0 border-[12px] border-white rounded-[40px] pointer-events-none z-30" />
             </div>
 
             {/* Инструкция или кнопка Share */}
@@ -303,9 +353,8 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
               </AnimatePresence>
             </div>
           </div>
-
-          </div>
         </div>
+        </motion.div>
       </section>
     </div>
   );
