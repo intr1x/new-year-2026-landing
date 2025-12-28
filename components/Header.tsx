@@ -36,9 +36,7 @@ export default function Header({ onOpenGift, activeScreen }: HeaderProps) {
       <div className="container mx-auto px-4 flex items-start justify-between">
         <button 
           onClick={handleLogoClick}
-          className={`${
-            isDarkScreen ? 'bg-slate-900 shadow-brand-blue/10' : 'bg-white shadow-sm'
-          } px-8 py-5 rounded-b-3xl pointer-events-auto cursor-pointer hover:shadow-md transition-all duration-500`}
+          className="px-8 py-5 pointer-events-auto cursor-pointer transition-all duration-500"
           aria-label="Прокрутить к верху"
         >
           <svg
