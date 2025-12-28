@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2 } from 'lucide-react';
+import { Share2, ArrowRight } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import content from '@/content/landing.ru.json';
 import {
   trackMessageRevealed,
@@ -16,6 +18,7 @@ interface Screen4Props {
 }
 
 export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
+  const sectionRef = useRef<HTMLElement>(null);
   const screenContent = content.screens.s4;
   const [state, setState] = useState<ScratchState>('idle');
   const [selectedMessage, setSelectedMessage] = useState<string>('');
@@ -35,13 +38,28 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
     }
   }, [screenContent.messages, selectedMessage]);
 
-  // Инициализация холста (серебристое напыление с текстом)
+  useLayoutEffect(() => {
+    if (!isMounted) return;
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: '+=100%',
+        pin: true,
+        pinType: 'transform',
+        scrub: 1,
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
   const initCanvas = useCallback(async () => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // Ждем загрузки шрифтов, чтобы Caveat применился к холсту
     if (typeof document !== 'undefined' && 'fonts' in document) {
       await document.fonts.ready;
     }
@@ -57,7 +75,6 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
     if (ctx) {
       ctx.scale(dpr, dpr);
       
-      // Создаем эффект серебристого металла
       const gradient = ctx.createLinearGradient(0, 0, rect.width, rect.height);
       gradient.addColorStop(0, '#ADB5BD');
       gradient.addColorStop(0.2, '#CED4DA');
@@ -73,12 +90,10 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
         ctx.fillRect(Math.random() * rect.width, Math.random() * rect.height, 1, 1);
       }
 
-      // Автоподбор размера шрифта для подсказки, чтобы она точно влезла
-      const text = 'Сотри, чтобы узнать';
-      let fontSize = 44; // Оптимальный размер
+      const text = 'Сотри, чтобы получить';
+      let fontSize = 44;
       ctx.font = `${fontSize}px Caveat, cursive`;
       
-      // Если текст шире 90% карточки, уменьшаем его
       while (ctx.measureText(text).width > rect.width * 0.9 && fontSize > 20) {
         fontSize -= 2;
         ctx.font = `${fontSize}px Caveat, cursive`;
@@ -102,7 +117,6 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    // Увеличиваем кисть для стирания курсором
     ctx.beginPath();
     ctx.arc(x, y, 40, 0, Math.PI * 2);
     ctx.fill();
@@ -135,7 +149,6 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
       const x = clientX - rect.left;
       const y = clientY - rect.top;
       
-      // Стираем
       if (x >= -20 && x <= rect.width + 20 && y >= -20 && y <= rect.height + 20) {
         if (state === 'idle') {
           setState('scratching');
@@ -174,90 +187,126 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
 
   const getFontSizeClass = (text: string) => {
     const len = text.length;
-    if (len > 250) return 'text-lg md:text-xl';
-    if (len > 180) return 'text-xl md:text-2xl';
-    if (len > 120) return 'text-2xl md:text-3xl';
-    return 'text-3xl md:text-5xl';
+    if (len > 250) return 'text-xl md:text-2xl lg:text-3xl';
+    if (len > 180) return 'text-2xl md:text-3xl lg:text-4xl';
+    if (len > 120) return 'text-3xl md:text-4xl lg:text-5xl';
+    return 'text-4xl md:text-5xl lg:text-6xl';
   };
 
   return (
-    <section data-screen="4" className="h-screen flex flex-col items-center justify-center px-4 pt-16 md:pt-20 relative overflow-hidden bg-slate-50">
-      <div className="max-w-2xl w-full text-center z-10 flex flex-col items-center">
-        <motion.h2 className="text-2xl md:text-5xl font-bold mb-6 md:mb-12 text-slate-900 font-display">
-          {screenContent.h2}
-        </motion.h2>
+    <div data-screen="4">
+      <section 
+        ref={sectionRef}
+        className="h-screen flex flex-col items-center justify-center px-4 py-8 md:py-16 relative overflow-hidden bg-white"
+      >
+        <div className="relative z-10 max-w-7xl w-full">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+          
+          {/* Левая колонка: Заголовок и кнопка перехода */}
+          <div className="flex-1 max-w-xl text-left">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl lg:text-[72px] font-display font-bold mb-8 md:mb-12 text-gray-900 leading-[1.1] whitespace-pre-line"
+            >
+              {screenContent.h2}
+            </motion.h2>
 
-        <div className="relative flex flex-col items-center w-full">
-          {/* Бумажка (Карточка) */}
-          <div 
-            ref={containerRef}
-            onMouseDown={() => setIsDrawing(true)}
-            onTouchStart={() => setIsDrawing(true)}
-            className="relative w-full max-w-md aspect-[4/3] bg-white rounded-xl shadow-2xl overflow-hidden border-4 md:border-8 border-white"
-          >
-            {/* Текст послания (под напылением) */}
-            <div className="absolute inset-0 flex items-center justify-center px-8 py-12 md:px-12 md:py-16 bg-white">
-              <p className={`${getFontSizeClass(selectedMessage)} text-black font-handwriting text-left leading-tight w-full`}>
-                {selectedMessage || '...'}
-              </p>
-            </div>
-
-            {/* Серебристое напыление */}
             <AnimatePresence>
-              {state !== 'revealed' && (
-                <motion.canvas
-                  ref={canvasRef}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="absolute inset-0 z-20 touch-none"
-                />
+              {state === 'revealed' && onNext && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="hidden lg:block mt-8"
+                >
+                  <button
+                    onClick={onNext}
+                    className="flex items-center gap-2 px-8 py-4 bg-brand-blue text-white rounded-full hover:bg-brand-dark transition-all text-lg font-bold shadow-2xl shadow-brand-blue/20 hover:scale-105 active:scale-95"
+                  >
+                    Вперёд в 2026
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Инструкция (вместо монетки) */}
-          <AnimatePresence>
-            {state !== 'revealed' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="mt-8 text-slate-400 font-medium text-center"
-              >
-                <p className="animate-pulse">Просто нажми и сотри пальцем или курсором</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Правая колонка: Послание (скретч-карта) */}
+          <div className="flex-[1.5] w-full max-w-2xl flex flex-col items-center">
+            <div 
+              ref={containerRef}
+              onMouseDown={() => setIsDrawing(true)}
+              onTouchStart={() => setIsDrawing(true)}
+              className="relative w-full aspect-[16/10] bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border-8 border-white cursor-crosshair"
+            >
+              {/* Текст послания */}
+              <div className="absolute inset-0 flex items-center justify-center px-8 py-10 md:px-12 bg-white">
+                <p className={`${getFontSizeClass(selectedMessage)} text-gray-900 font-handwriting text-left leading-tight w-full`}>
+                  {selectedMessage || '...'}
+                </p>
+              </div>
 
-          {/* Кнопка Share и Next */}
-          <AnimatePresence>
-            {state === 'revealed' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-12 flex flex-col md:flex-row gap-4"
-              >
-                <button
-                  onClick={handleShare}
-                  className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-slate-900 border-2 border-slate-200 rounded-full font-bold shadow-sm hover:bg-slate-50 transition-all"
-                >
-                  <Share2 size={20} />
-                  {screenContent.buttons.share}
-                </button>
-
-                {onNext && (
-                  <button
-                    onClick={onNext}
-                    className="flex items-center justify-center gap-2 px-12 py-4 bg-gradient-to-r from-brand-blue to-brand-light text-white rounded-full font-bold shadow-lg hover:from-brand-dark hover:to-brand-blue transition-all shadow-brand-blue/25"
-                  >
-                    Вперёд в 2026
-                  </button>
+              {/* Серебристое напыление */}
+              <AnimatePresence>
+                {state !== 'revealed' && (
+                  <motion.canvas
+                    ref={canvasRef}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 z-20 touch-none"
+                  />
                 )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </AnimatePresence>
+            </div>
+
+            {/* Инструкция или кнопка Share */}
+            <div className="mt-8 h-12 flex items-center justify-center w-full">
+              <AnimatePresence mode="wait">
+                {state !== 'revealed' ? (
+                  <motion.p
+                    key="hint"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-gray-400 font-medium text-center animate-pulse"
+                  >
+                    Просто нажми и сотри пальцем или курсором
+                  </motion.p>
+                ) : (
+                  <motion.div
+                    key="actions"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center gap-6"
+                  >
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-600 border border-gray-100 rounded-full font-bold shadow-sm hover:bg-gray-50 transition-all text-sm"
+                    >
+                      <Share2 size={16} />
+                      {screenContent.buttons.share}
+                    </button>
+                    
+                    {/* Кнопка "Next" для мобильных */}
+                    {onNext && (
+                      <button
+                        onClick={onNext}
+                        className="lg:hidden flex items-center gap-2 px-8 py-4 bg-brand-blue text-white rounded-full font-bold shadow-lg text-lg"
+                      >
+                        Вперёд в 2026
+                        <ArrowRight size={20} />
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
