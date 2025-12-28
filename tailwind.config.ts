@@ -18,7 +18,7 @@ const config: Config = {
       fontFamily: {
         display: ['var(--font-rubik)', 'sans-serif'],
         handwriting: ['var(--font-caveat)', 'cursive'],
-        sans: ['var(--font-inter)', 'sans-serif'],
+        sans: ['var(--font-rubik)', 'sans-serif'],
       },
     },
   },

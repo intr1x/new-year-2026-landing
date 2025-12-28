@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" className={`${rubik.variable} ${caveat.variable} ${inter.variable}`}>
-      <body className={`antialiased ${inter.className}`}>{children}</body>
+      <body className={`antialiased ${rubik.className}`}>{children}</body>
     </html>
   );
 }

@@ -262,10 +262,10 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
                 >
                   <button
                     onClick={onNext}
-                    className="flex items-center gap-2 px-8 py-4 bg-brand-blue text-white rounded-full hover:bg-brand-dark transition-all text-lg font-bold shadow-2xl shadow-brand-blue/20 hover:scale-105 active:scale-95"
+                    className="flex items-center gap-3 px-10 py-5 bg-brand-blue text-white rounded-full hover:bg-brand-dark transition-all text-xl font-display font-bold shadow-2xl shadow-brand-blue/20 hover:scale-105 active:scale-95"
                   >
                     Вперёд в 2026
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-6 h-6" />
                   </button>
                 </motion.div>
               )}
@@ -332,7 +332,7 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
                   >
                     <button
                       onClick={handleShare}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-600 border border-gray-100 rounded-full font-bold shadow-sm hover:bg-gray-50 transition-all text-sm"
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-600 border border-gray-100 rounded-full font-display font-bold shadow-sm hover:bg-gray-50 transition-all text-sm"
                     >
                       <Share2 size={16} />
                       {screenContent.buttons.share}
@@ -342,10 +342,10 @@ export default function Screen4_CandyReveal({ onNext }: Screen4Props) {
                     {onNext && (
                       <button
                         onClick={onNext}
-                        className="lg:hidden flex items-center gap-2 px-8 py-4 bg-brand-blue text-white rounded-full font-bold shadow-lg text-lg"
+                        className="lg:hidden flex items-center gap-3 px-10 py-5 bg-brand-blue text-white rounded-full font-display font-bold shadow-lg text-xl"
                       >
                         Вперёд в 2026
-                        <ArrowRight size={20} />
+                        <ArrowRight size={24} />
                       </button>
                     )}
                   </motion.div>

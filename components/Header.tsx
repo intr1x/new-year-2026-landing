@@ -72,10 +72,10 @@ export default function Header({ onOpenGift, activeScreen }: HeaderProps) {
         </button>
         <button
           onClick={handleOpenGift}
-          className="mt-4 pointer-events-auto flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-blue to-brand-light text-white rounded-full hover:from-brand-dark hover:to-brand-blue transition-all text-sm font-medium shadow-xl shadow-brand-blue/25 hover:scale-105 active:scale-95"
+          className="mt-4 pointer-events-auto flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-blue to-brand-light text-white rounded-full hover:from-brand-dark hover:to-brand-blue transition-all text-base font-display font-bold shadow-xl shadow-brand-blue/25 hover:scale-105 active:scale-95"
           aria-label="Открыть послание"
         >
-          <Gift className="w-4 h-4" />
+          <Gift className="w-5 h-5" />
           {content.header.ctaToGift}
         </button>
       </div>

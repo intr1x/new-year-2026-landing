@@ -108,35 +108,66 @@ export default function Screen5_Horse() {
     <div data-screen="6">
       <section
         ref={sectionRef}
-        className="min-h-screen flex flex-col items-center justify-center px-4 py-12 md:py-24 relative overflow-hidden bg-slate-950"
+        className="min-h-screen md:h-screen flex flex-col items-center justify-center px-4 pt-20 pb-10 md:pt-24 md:pb-16 relative overflow-hidden bg-slate-950"
       >
         <motion.div 
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 max-w-7xl w-full flex flex-col items-center"
+          className="relative z-10 max-w-7xl w-full flex flex-col items-center justify-center h-full"
         >
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center w-full mb-16 md:mb-24">
-            <div ref={textRef} className="flex-1 max-w-xl text-left">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center w-full justify-center max-w-none">
+            <div ref={textRef} className="flex-[1.4] text-center lg:text-left flex flex-col items-center lg:items-start">
               <h2
                 ref={titleRef}
-                className="bg-gradient-to-br from-white to-brand-light bg-clip-text text-transparent text-3xl md:text-5xl lg:text-[72px] font-display font-bold leading-[1.1] tracking-tight mb-8"
+                className="bg-gradient-to-br from-white to-brand-light bg-clip-text text-transparent text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold leading-[1.1] tracking-tight mb-4 md:mb-6 w-full"
               >
-                {screenContent.h2}
+                Желаем оседлать своего <br className="hidden xl:block" />
+                огненного коня в <span className="whitespace-nowrap">2026-м году!</span>
               </h2>
 
               <p
                 ref={subTextRef}
-                className="text-xl md:text-3xl font-handwriting text-brand-light/80"
+                className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-handwriting text-brand-light/80 mb-6 md:mb-8"
               >
-                Ваша команда — всегда рядом.
+                Ваша команда Relevant — всегда рядом.
               </p>
+
+              {/* Финальная кнопка рядом с текстом */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="flex flex-col items-center lg:items-start"
+              >
+                <a
+                  href={messageContent.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative inline-flex items-center gap-3 px-6 py-3 md:px-8 md:py-4 bg-brand-blue text-white rounded-[20px] md:rounded-[24px] hover:bg-brand-dark transition-all duration-500 hover:scale-105 active:scale-95 shadow-[0_15px_30px_rgba(59,130,246,0.2)] hover:shadow-[0_25px_50px_rgba(59,130,246,0.4)]"
+                >
+                  <div className="bg-white/20 p-1.5 md:p-2 rounded-lg md:rounded-xl group-hover:rotate-12 transition-transform duration-500">
+                    <MessageSquareText className="w-4 h-4 md:w-5 md:h-5" />
+                  </div>
+                  <span className="text-base md:text-lg lg:text-xl font-display font-bold">
+                    {messageContent.cta}
+                  </span>
+                  
+                  <div className="absolute inset-0 rounded-[20px] md:rounded-[24px] overflow-hidden pointer-events-none">
+                    <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/10 to-transparent rotate-45 transform translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000" />
+                  </div>
+                </a>
+                <p className="mt-3 text-gray-500 font-sans text-[10px] md:text-xs opacity-40 uppercase tracking-widest text-center lg:text-left">
+                  Напишите нам, мы на связи
+                </p>
+              </motion.div>
             </div>
 
             <div
               ref={imageRef}
-              className="flex-[1.2] w-full max-w-xl flex flex-col items-center lg:items-end"
+              className="flex-1 w-full max-w-2xl flex flex-col items-center lg:items-end"
               style={{ perspective: "1000px" }}
             >
               <motion.div
@@ -147,49 +178,19 @@ export default function Screen5_Horse() {
                   rotateY,
                   transformStyle: "preserve-3d",
                 }}
-                className="relative rounded-[32px] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-transparent inline-block"
+                className="relative rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-transparent inline-block"
               >
                 <img
                   src={screenContent.image}
                   alt={screenContent.imageAlt}
-                  className="w-auto h-auto max-w-full max-h-[60vh] object-contain block"
+                  className="w-auto h-auto max-w-full max-h-[40vh] md:max-h-[50vh] lg:max-h-[55vh] object-contain block"
                 />
               </motion.div>
-              <p className="mt-6 text-[10px] md:text-xs text-gray-500 font-sans italic text-right w-full">
+              <p className="mt-4 text-[10px] md:text-xs text-gray-500 font-sans italic text-right w-full">
                 К. Петров-Водкин, «Купание красного коня», 1912
               </p>
             </div>
           </div>
-
-          {/* Финальная кнопка */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="w-full max-w-2xl text-center pt-8 border-t border-white/10"
-          >
-            <a
-              href={messageContent.telegram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative inline-flex items-center gap-6 px-10 py-8 md:px-16 md:py-10 bg-brand-blue text-white rounded-[40px] hover:bg-brand-dark transition-all duration-500 hover:scale-105 active:scale-95 shadow-[0_30px_60px_rgba(59,130,246,0.3)] hover:shadow-[0_40px_80px_rgba(59,130,246,0.5)]"
-            >
-              <div className="bg-white/20 p-3 rounded-2xl group-hover:rotate-12 transition-transform duration-500">
-                <MessageSquareText className="w-8 h-8 md:w-10 md:h-10" />
-              </div>
-              <span className="text-2xl md:text-4xl font-display font-bold">
-                {messageContent.cta}
-              </span>
-              
-              <div className="absolute inset-0 rounded-[40px] overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/10 to-transparent rotate-45 transform translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000" />
-              </div>
-            </a>
-            <p className="mt-8 text-gray-500 font-sans text-sm md:text-base opacity-40 uppercase tracking-widest">
-              Напишите нам, мы на связи
-            </p>
-          </motion.div>
         </motion.div>
 
         {/* Фоновые градиенты */}
@@ -199,7 +200,7 @@ export default function Screen5_Horse() {
         </div>
 
         {/* Футер */}
-        <footer className="absolute bottom-8 w-full text-center px-4">
+        <footer className="absolute bottom-4 w-full text-center px-4">
           <p className="text-gray-600 text-[10px] md:text-xs font-sans tracking-[0.2em] uppercase opacity-50">
             &copy; {new Date().getFullYear()} Relevant. Рядом, шаг за шагом.
           </p>

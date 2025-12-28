@@ -104,10 +104,10 @@ export default function Screen3_Commitment({ onNext }: Screen3_CommitmentProps) 
             <div className="flex justify-start">
               <button
                 onClick={onNext}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-blue text-white rounded-full hover:bg-brand-dark transition-all text-lg font-bold shadow-2xl shadow-brand-blue/20 hover:scale-105 active:scale-95"
+                className="flex items-center gap-3 px-10 py-5 bg-brand-blue text-white rounded-full hover:bg-brand-dark transition-all text-xl font-display font-bold shadow-2xl shadow-brand-blue/20 hover:scale-105 active:scale-95"
               >
                 {screenContent.cta}
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-6 h-6" />
               </button>
             </div>
           </div>
