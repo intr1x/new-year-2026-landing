@@ -115,7 +115,9 @@ export default function Screen2_TeamFloat() {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
             <div ref={textBlockRef} className="flex-1 max-w-2xl">
               <h2 className="text-3xl md:text-5xl lg:text-[72px] font-display font-bold text-left mb-6 md:mb-8 text-gray-900 leading-tight">
-                {screenContent.h2}
+                Мы прошли этот год <span className="relative inline-block underline-wave">
+                  вместе
+                </span>
               </h2>
               <p className="text-lg md:text-xl lg:text-2xl text-left text-gray-600 leading-relaxed">
                 {screenContent.text}

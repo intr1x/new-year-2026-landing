@@ -124,7 +124,7 @@ export default function Screen5_Horse() {
                 className="bg-gradient-to-br from-white to-brand-light bg-clip-text text-transparent text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold leading-[1.1] tracking-tight mb-4 md:mb-6 w-full"
               >
                 Желаем оседлать своего <br className="hidden xl:block" />
-                огненного коня в <span className="whitespace-nowrap">2026-м году!</span>
+                <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">огненного коня</span> в <span className="whitespace-nowrap">2026-м году!</span>
               </h2>
 
               <p

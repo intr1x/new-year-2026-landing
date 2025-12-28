@@ -41,6 +41,62 @@ body {
   }
 }
 
+/* Анимация волны */
+@keyframes wave-scroll {
+  0% {
+    -webkit-mask-position-x: 0;
+    mask-position-x: 0;
+  }
+  100% {
+    -webkit-mask-position-x: -40px;
+    mask-position-x: -40px;
+  }
+}
+
+.underline-wave {
+  position: relative;
+  display: inline-block;
+}
+
+.underline-wave::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 12px;
+  background: #EC4899;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0,5 Q5,1 10,5 T20,5 T30,5 T40,5' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 10'%3E%3Cpath d='M0,5 Q5,1 10,5 T20,5 T30,5 T40,5' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-size: 40px 12px;
+  mask-size: 40px 12px;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-position: 0 center;
+  mask-position: 0 center;
+  animation: wave-scroll 2.5s linear infinite;
+}
+
+@media (min-width: 768px) {
+  .underline-wave::after {
+    bottom: -8px;
+    height: 14px;
+    -webkit-mask-size: 50px 14px;
+    mask-size: 50px 14px;
+  }
+  
+  @keyframes wave-scroll {
+    0% {
+      -webkit-mask-position-x: 0;
+      mask-position-x: 0;
+    }
+    100% {
+      -webkit-mask-position-x: -50px;
+      mask-position-x: -50px;
+    }
+  }
+}
+
 /* Уважаем prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *,
